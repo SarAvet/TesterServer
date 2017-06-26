@@ -1,10 +1,20 @@
 package entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class User {
 
 	String login;
 	String password;
 	boolean isBlocked;
+	List<Departament> departaments;
+	
+	public User(){
+		
+		departaments = new ArrayList<>();
+		
+	}
 	
 	public void setLogin(String login){
 		this.login = login;
@@ -28,6 +38,14 @@ public class User {
 	
 	public boolean getBlocked(){
 		return this.isBlocked;
+	}
+	
+	public void addDepartament(List<Departament> departament){
+		this.departaments.addAll(departament);
+	}
+	
+	public List<Departament> getDepartaments(){
+		return this.departaments;
 	}
 	
 }

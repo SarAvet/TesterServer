@@ -24,7 +24,7 @@ public class DatabaseContext implements IDatabaseContext{
 	
 	/**
 	 * ѕолучение всех пользователей 
-	 * @return
+	 * @return - список пользователей
 	 * @throws SQLException
 	 */
 	@Override
@@ -47,6 +47,9 @@ public class DatabaseContext implements IDatabaseContext{
 				user.setBlocked(isBlocked);
 				userList.add(user);
 				
+				List<Departament> departaments = getDepartamentsOf(user);
+				user.addDepartament(departaments);
+				
 			}
 			catch(SQLException e){
 				
@@ -54,6 +57,120 @@ public class DatabaseContext implements IDatabaseContext{
 		}
 		
 		return userList;	
+	}
+	
+	/**
+	 * ѕолучение отделов некоторого пользовател€
+	 * @param user - пользователь
+	 * @return - список отделов, в котрые входит пользователь
+	 * @throws SQLException
+	 */
+	public List<Departament> getDepartamentsOf(User user) throws SQLException{
+		
+		ResultSet userDepartamentsSet = 
+				connection.createStatement().executeQuery("SELECT * FROM users_departaments "
+															+ "WHERE user_login = '"+user.getLogin()+"'");
+		
+		List<Departament> userDepartaments = new ArrayList<>();
+		
+		while(userDepartamentsSet.next()){
+			
+			try
+			{
+				Departament departament = new Departament(userDepartamentsSet.getString("title"));
+				userDepartaments.add(departament);
+			}
+			catch(SQLException e){
+				
+			}
+			
+		}
+		
+		return userDepartaments;
+		
+	}
+	
+	public Answer getAnswer(int code) throws SQLException{
+		
+		ResultSet answerSet = connection.createStatement().executeQuery("SELECT * FROM answers "
+																			+ "WHERE code = "+code+"");
+		Answer answer = new Answer();
+		answer.setText(answerSet.getString("text"));
+		
+		return answer;
+	}
+	
+	/**
+	 * ѕолучение вариантов ответов на вопрос
+	 * @param question
+	 * @return список вариантов ответов на вопрос
+	 * @throws SQLException
+	 */
+	public List<Answer> getAnswersOf(Question question) throws SQLException{
+		
+		ResultSet questionAnswersSet = 
+				connection.createStatement().executeQuery("SELECT * FROM questions_answers "
+															+ "WHERE question_code = "+question.getCode()+" ");
+		List<Answer> questionAnswers = new ArrayList<>();
+		
+		while(questionAnswersSet.next())
+		{
+			boolean isAnswerRight = questionAnswersSet.getInt("isRight") != 0;
+			
+			Answer answer = getAnswer(questionAnswersSet.getInt("answer_code"));
+			answer.setRight(isAnswerRight);
+			answer.setComment(questionAnswersSet.getString("comment"));
+			
+			questionAnswers.add(answer);
+		}
+		
+		return questionAnswers;
+	}
+	
+	public Question getQuestion(int code) throws SQLException{
+		ResultSet questionSet = connection.createStatement().executeQuery("SELECT * FROM questions "
+																			+ "WHERE code = "+code+"");
+		Question question = new Question(questionSet.getString("question"));
+		return question;
+	}
+	
+	public List<Question> getQuestionsOf(Test test) throws SQLException{
+		
+		ResultSet testQuestionsSet = 
+				connection.createStatement().executeQuery("SELECT * FROM tests_questions "
+															+ "WHERE test_title = '"+test.getTitle()+"' ");
+		List<Question> testQuestions = new ArrayList<>();
+		
+		while(testQuestionsSet.next())
+		{
+			
+			Question question = getQuestion(testQuestionsSet.getInt("question_code"));
+			question.setQuestionValue(testQuestionsSet.getInt("question_value"));
+			
+			int subquestionCode = testQuestionsSet.getInt("subquestion_code");
+			Question currentSubquestion = null;
+			if(subquestionCode==0)
+			{
+				currentSubquestion = getQuestion(testQuestionsSet.getInt("subquestion_code"));
+				question.setSubquestion(currentSubquestion);
+			}
+						
+			while(currentSubquestion!=null){
+				
+				int nextSubquestionCode = testQuestionsSet.getInt("subquestion_code");
+				Question nextSubquestion = null;
+				if(subquestionCode==0)
+				{
+					nextSubquestion = getQuestion(testQuestionsSet.getInt("subquestion_code"));
+					question.setSubquestion(currentSubquestion);
+				}
+			}
+						
+			questionAnswers.add(answer);
+		}
+		
+		return questionAnswers;
+		
 	}
 	
 }
