@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -154,6 +156,9 @@ public class DatabaseContext implements IDatabaseContext{
 		ResultSet questionSet = connection.createStatement().executeQuery("SELECT * FROM questions "
 																			+ "WHERE code = "+code+"");
 		Question question = new Question(questionSet.getString("question"));
+		question.setCode(code);
+		question.setAnswers(getAnswersOf(question));
+		
 		return question;
 	}
 	
@@ -205,25 +210,58 @@ public class DatabaseContext implements IDatabaseContext{
 																		+ "WHERE title = '"+testTitle+"'");
 		
 		Test test = new Test();
-		
+		test.setTitle(testSet.getString("title"));
+		test.setDescription(testSet.getString("description"));
+		test.setDuration(LocalTime.parse(testSet.getString("duration")));
+		test.setCreateDateTime(LocalDateTime.parse(testSet.getString("create_datetime")));
+		test.setUpdateDateTime(LocalDateTime.parse(testSet.getString("update_datetime")));
+		test.addQuestion(getQuestionsOf(test));
 		
 		return test;
 		
 	}
 	
-	public List<Test> getTestsOf(Departament departament) throws SQLException{
+	/**
+	 * ѕолучение тестов, принадлежащих какому-то отделу
+	 * @param departament - отделение
+	 * @return список тестов
+	 * @throws SQLException
+	 */
+	public List<Test> getTestsBelongTo(Departament departament) throws SQLException{
 		
 		ResultSet testsSet = 
-				connection.createStatement().executeQuery("SELECT * FROM departaments_tests "
-															+ "WHERE departaments_title = '"+departament.getTitle()+"'");
+				connection.createStatement().executeQuery("SELECT test_title FROM departaments_tests "
+															+ "WHERE departament_title = '"+departament.getTitle()+"'");
 		List<Test> tests = new ArrayList<>();
 		
 		while(testsSet.next()){
-			
-			
-			
+			tests.add(getTest(testsSet.getString("test_title")));
 		}
 		
+		return tests;
+	}
+	
+	/**
+	 * ѕолучение всех тестов пользовател€
+	 * @param user - пользователь
+	 * @return - список тестов
+	 * @throws SQLException
+	 */
+	public List<Test> getTestsOf(User user) throws SQLException{
+		
+		List<Test> tests = new ArrayList<>();
+		List<Departament> departaments = getDepartamentsOf(user);
+		
+		departaments.stream().forEach(d->{
+			try
+			{
+				tests.addAll(getTestsBelongTo(d));
+			}
+			catch(SQLException e){
+				
+			}
+		});
+						
 		return tests;
 	}
 	

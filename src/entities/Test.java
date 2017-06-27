@@ -14,7 +14,7 @@ public class Test {
 
 	String title;
 	String description;
-	LocalTime time;
+	LocalTime duration;
 	LocalDateTime createDatetime;
 	LocalDateTime updateDatetime;
 	List<Question> questions;
@@ -39,12 +39,12 @@ public class Test {
 		return this.description;
 	}
 	
-	public void setTime(LocalTime time){
-		this.time = time;
+	public void setDuration(LocalTime duration){
+		this.duration = duration;
 	}
 	
-	public LocalTime getTime(){
-		return this.time;
+	public LocalTime getDuration(){
+		return this.duration;
 	}
 	
 	public void setCreateDateTime(LocalDateTime createDateTime){
@@ -55,7 +55,7 @@ public class Test {
 		return this.createDatetime;
 	}
 	
-	public void setUpdaetDateTime(LocalDateTime updateDateTime){
+	public void setUpdateDateTime(LocalDateTime updateDateTime){
 		this.updateDatetime = updateDateTime;
 	}
 	

@@ -1,10 +1,13 @@
 package entities;
 
+import java.util.List;
+
 public class Question {
 	int code;
 	String question;
 	int questionValue;
 	Question subquestion;
+	List<Answer> answers;
 	
 	/**
 	 * 
@@ -34,6 +37,10 @@ public class Question {
 		this.question = question;
 	}
 	
+	public void setCode(int code){
+		this.code = code;
+	}
+	
 	public int getCode(){
 		return this.code;
 	}
@@ -52,5 +59,13 @@ public class Question {
 	
 	public Question getSubquestion(){
 		return this.subquestion;
+	}
+	
+	public void setAnswers(List<Answer> answers){
+		this.answers = answers;
+	}
+	
+	public List<Answer> getAnswers(){
+		return this.answers;
 	}
 }
