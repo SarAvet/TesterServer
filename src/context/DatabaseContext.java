@@ -90,7 +90,18 @@ public class DatabaseContext implements IDatabaseContext{
 		
 	}
 	
+	/**
+	 * ѕолучение варианта ответа
+	 * @param code - идентификатор варианта ответа
+	 * @return - вариант ответа
+	 * @throws SQLException
+	 */
 	public Answer getAnswer(int code) throws SQLException{
+		
+		if(code<=0)
+		{
+			throw new IllegalArgumentException(" од варианта ответа - целое положительное число.");
+		}
 		
 		ResultSet answerSet = connection.createStatement().executeQuery("SELECT * FROM answers "
 																			+ "WHERE code = "+code+"");
@@ -127,13 +138,32 @@ public class DatabaseContext implements IDatabaseContext{
 		return questionAnswers;
 	}
 	
+	/**
+	 * ѕолучение вопроса
+	 * @param code - идентификатор вопроса
+	 * @return - вопрос
+	 * @throws SQLException
+	 */
 	public Question getQuestion(int code) throws SQLException{
+		
+		if(code<=0)
+		{
+			throw new IllegalArgumentException(" од вопроса - положительное целое число.");
+		}
+		
 		ResultSet questionSet = connection.createStatement().executeQuery("SELECT * FROM questions "
 																			+ "WHERE code = "+code+"");
 		Question question = new Question(questionSet.getString("question"));
 		return question;
 	}
 	
+	
+	/**
+	 * ѕолучение вопросов теста
+	 * @param test - тест
+	 * @return - список вариантов ответа
+	 * @throws SQLException
+	 */
 	public List<Question> getQuestionsOf(Test test) throws SQLException{
 		
 		ResultSet testQuestionsSet = 
@@ -149,28 +179,52 @@ public class DatabaseContext implements IDatabaseContext{
 			
 			int subquestionCode = testQuestionsSet.getInt("subquestion_code");
 			Question currentSubquestion = null;
+			
 			if(subquestionCode==0)
 			{
 				currentSubquestion = getQuestion(testQuestionsSet.getInt("subquestion_code"));
 				question.setSubquestion(currentSubquestion);
+				subquestionCode = currentSubquestion.getSubquestion().getCode();
 			}
 						
-			while(currentSubquestion!=null){
-				
-				int nextSubquestionCode = testQuestionsSet.getInt("subquestion_code");
-				Question nextSubquestion = null;
-				if(subquestionCode==0)
-				{
-					nextSubquestion = getQuestion(testQuestionsSet.getInt("subquestion_code"));
-					question.setSubquestion(currentSubquestion);
-				}
-			}
-						
-			questionAnswers.add(answer);
+			testQuestions.add(question);
 		}
 		
-		return questionAnswers;
+		return testQuestions;
 		
+	}
+	
+	public Test getTest(String testTitle) throws SQLException{
+		
+		if(testTitle==null || testTitle!=null && testTitle.equals(""))
+		{
+			throw new IllegalArgumentException("Ќе указано название теста.");
+		}
+		
+		ResultSet testSet = connection.createStatement().executeQuery("SELECT * FROM test "
+																		+ "WHERE title = '"+testTitle+"'");
+		
+		Test test = new Test();
+		
+		
+		return test;
+		
+	}
+	
+	public List<Test> getTestsOf(Departament departament) throws SQLException{
+		
+		ResultSet testsSet = 
+				connection.createStatement().executeQuery("SELECT * FROM departaments_tests "
+															+ "WHERE departaments_title = '"+departament.getTitle()+"'");
+		List<Test> tests = new ArrayList<>();
+		
+		while(testsSet.next()){
+			
+			
+			
+		}
+		
+		return tests;
 	}
 	
 }
